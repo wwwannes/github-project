@@ -1,7 +1,9 @@
 <template>
   <h1>WWWannes repo</h1>
-  <ul class="repo__List" v-if="!errorMsg">
-    <li v-for="item in repoList.data" :key="item.id">{{ item.name }}</li>
+  <ul class="repolist" v-if="!errorMsg">
+    <li class="repolist__item" v-for="item in repoList.data" :key="item.id">
+      <router-link :to="{name: 'Details', params: {name: item.name}}" >{{ item.name }}</router-link>
+    </li>
   </ul>
   <div class="error" v-if="errorMsg">{{ errorMsg.message }}</div>
 </template>
@@ -21,10 +23,10 @@ export default {
     axios.get("https://api.github.com/users/wwwannes/repos").then(resp => {
       errorMsg.value = '';
       repoList.value =  resp;
+      console.log(resp)
     }).catch(err => {
       errorMsg.value = err;
     });
-    console.log(repoList.value)
 
     onMounted(() => {
     });
