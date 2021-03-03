@@ -1,7 +1,8 @@
 <template>
   <h1>{{ props.userName }} repo</h1>
+  <input type="text" v-model="searchTerm" @keyup="searchRepos"/>
   <ul class="repolist" v-if="!errorMsg">
-    <li class="repolist__item" v-for="item in repoList.data" :key="item.id">
+    <li class="repolist__item" v-for="item in repos" :key="item.id">
       <router-link :to="{name: 'Details', params: {name: item.name}}" >{{ item.name }}</router-link>
     </li>
   </ul>
@@ -9,29 +10,32 @@
 </template>
 
 <script>
-// @ is an alias to /src
-import { ref } from "@vue/runtime-core";
-import axios from "axios";
+import { ref } from '@vue/reactivity';
+import { apiCall } from '../composables/APIcalls';
 
 export default {
   name: "Home",
   props: ["userName"],
   setup(props){
-    const repoList = ref([]);
-    const errorMsg = ref('');
+    const searchTerm = ref('');
+    const { data, errorMsg, loadData } = apiCall(`/users/${props.userName}/repos`);
 
-    axios.get(`https://api.github.com/users/${props.userName}/repos`).then(resp => {
-      errorMsg.value = '';
-      repoList.value =  resp;
-      console.log(resp)
-    }).catch(err => {
-      errorMsg.value = err;
-    });
+    loadData();
+
+    const repos = ref(data);
+
+    /*const searchRepos = computed(() => {
+      return repos.value.filter(item => {
+        return Object.values(item).includes(searchTerm.value);
+      });
+    })*/
 
     return{
       props,
-      repoList,
-      errorMsg
+      repos,
+      errorMsg,
+      searchTerm,
+      //searchRepos
     }
   }
 };

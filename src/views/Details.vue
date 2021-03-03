@@ -8,25 +8,20 @@
 </template>
 
 <script>
-  // @ is an alias to /src
-  import { ref } from "@vue/runtime-core";
+import { ref } from '@vue/reactivity';
   import { useRoute } from 'vue-router';
-  import axios from "axios";
+  import { apiCall } from '../composables/APIcalls';
 
   export default {
-    setup(){
+    props: ["userName"],
+    setup(props){
       const route = useRoute();
 
-      const details = ref([]);
-      const errorMsg = ref('');
+      const {data, errorMsg, loadData} = apiCall(`/repos/${props.userName}/${route.params.name}/commits`);
+    
+      loadData();
 
-      axios.get(`https://api.github.com/repos/wwwannes/${route.params.name}/commits`).then(resp => {
-        errorMsg.value = '';
-        details.value =  resp.data;
-        console.log(details.value);
-      }).catch(err => {
-        errorMsg.value = err;
-      });
+      const details = ref(data);
 
       return{
         route,

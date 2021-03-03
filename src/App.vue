@@ -15,7 +15,7 @@ export default {
     const userdata = ref(null);
 
     const setUserData = (data) => {
-      userdata.value = data;
+      userdata.value = ref(data);
       console.log(data);
     }
 
