@@ -1,6 +1,31 @@
 <template>
-  <router-view />
+  <router-view  v-if="userdata" :userName="userdata.login"/>
+  <SelectUser v-if="!userdata" @userFound="setUserData" />
 </template>
+
+<script>
+import { ref } from '@vue/reactivity';
+import SelectUser from "./components/SelectUser";
+
+export default {
+  components: {
+    SelectUser
+  },
+  setup(){
+    const userdata = ref(null);
+
+    const setUserData = (data) => {
+      userdata.value = data;
+      console.log(data);
+    }
+
+    return{
+      userdata,
+      setUserData
+    }
+  }
+}
+</script>
 
 <style lang="scss">
   #app {
