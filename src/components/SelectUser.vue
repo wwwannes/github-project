@@ -11,8 +11,7 @@
 </template>
 
 <script>
-//import { apiCall } from '../composables/APIcalls';
-import axios from "axios";
+import { apiCall } from '../composables/APIcalls';
 
 export default {
     emits: ["userFound"],
@@ -24,24 +23,13 @@ export default {
     },
     methods:{
         async getUserInfo(){
-            axios.get(`https://api.github.com/users/${this.userName}`).then(resp => {
-                this.errorMsg = '';
-                this.$emit('userFound', resp.data) // Make the user data available in App.vue
-                console.log(resp)
-            }).catch(err => {
-                this.errorMsg = err;
-            });
-        }
-        
-        /*async getUserInfo(){
             const { data, errorMsg, loadData } = apiCall(`/users/${this.userName}`);
 
-            loadData();
+            await loadData();
 
-            this.$emit('userFound', data) // Make the user data available in App.vue
+            await this.$emit('userFound', data) // Make the user data available in App.vue
             this.errorMsg = errorMsg;
-        }*/
-        
+        }
     }
 }
 </script>
@@ -70,6 +58,7 @@ export default {
             padding: 20px;
             border: 1px solid lightgray;
             border-radius: 5px;
+            background: #f6f8fa;
 
             &__label{
                 display: block;

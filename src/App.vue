@@ -1,6 +1,6 @@
 <template>
-  <router-view  v-if="userdata" :userName="userdata.login"/>
-  <SelectUser v-if="!userdata" @userFound="setUserData" />
+  <router-view  v-if="Object.keys(userdata).length > 0" :userName="userdata.login"/>
+  <SelectUser v-else @userFound="setUserData" />
 </template>
 
 <script>
@@ -12,11 +12,11 @@ export default {
     SelectUser
   },
   setup(){
-    const userdata = ref(null);
+    const userdata = ref([]);
 
     const setUserData = (data) => {
-      userdata.value = ref(data);
-      console.log(data);
+      userdata.value = data.value;
+      console.log(userdata)
     }
 
     return{
