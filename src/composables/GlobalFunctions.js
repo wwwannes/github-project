@@ -16,3 +16,8 @@ export const apiCall = (call) => {
 
     return { data, errorMsg, loadData }
 }
+
+export const formatDate = (date) => {
+    const fullDate = new Date(date);
+    return `${fullDate.getFullYear()}-${fullDate.getMonth()+1}-${fullDate.getDate()}`;
+}

@@ -58,7 +58,8 @@ export default {
     font-size: 18px;
   }
 
-  .input{
+  .input,
+  select{
     border: 1px solid lightgray;
     border-radius: 6px;
     width: calc(100% - 25px);

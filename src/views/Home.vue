@@ -17,10 +17,30 @@
       </div>
     </div>
     <div class="repos__content">
-      <input type="text" v-model="searchTerm" class="input" placeholder="Search for repositories..."/>
+
+      <!--<div class="repos__content__user_tools">
+        <input type="text" v-model="searchTerm" class="input" placeholder="Search for repositories..."/>
+        <select v-model="sorting">
+          <option value="name--asc">Name Ascending</option>
+          <option value="name--desc">Name Descending</option>
+          <option value="created_at--asc">Created Ascending</option>
+          <option value="created_at--desc">Created Descending</option>
+          <option value="updated_at--asc">Updated Ascending</option>
+          <option value="updated_at--desc">Updated Descending</option>
+        </select>
+      </div>-->
+
+      <UserTools :data="repos" @updateList="reorderRepo" v-if="repos.length > 0"/>
+
       <ul class="repolist" v-if="!error">
-        <li class="repolist__item" v-for="repo in searchRepos" :key="repo.id">
-          <h3><router-link :to="{name: 'Details', params: {name: repo.name}}" >{{ repo.name }}</router-link></h3>
+        <li class="repolist__item" v-for="repo in repos" :key="repo.id">
+          <div class="repolist__item__header">
+            <h3><router-link :to="{name: 'Details', params: {name: repo.name}}" >{{ repo.name }}</router-link></h3>
+            <div class="repolist__item__dates">
+              <span class="updated">Last updated: {{ formatDate(repo.updated_at) }}</span>
+              <span class="created">Created: {{ formatDate(repo.created_at) }}</span>
+            </div>
+          </div>
           <p class="info">{{ repo.description }}</p>
           <span class="languages row">{{ repo.language }}</span>
         </li>
@@ -32,14 +52,20 @@
 
 <script>
 import { ref } from '@vue/reactivity';
-import { apiCall } from '../composables/APIcalls';
-import { computed } from '@vue/runtime-core';
+import { apiCall, formatDate } from '../composables/GlobalFunctions';
+//import { computed } from '@vue/runtime-core';
+
+import UserTools from "../components/UserTools";
 
 export default {
   name: "Home",
   props: ["userData"],
+  components:{
+    UserTools
+  },
   setup(props){
-    const searchTerm = ref("");
+    /*const searchTerm = ref("");
+    const sorting = ref("name--asc")*/
     const repos = ref([]);
     const error = ref({});
 
@@ -54,10 +80,14 @@ export default {
 
     getAllRepos();
 
-    const searchRepos = computed(() => {
+    const reorderRepo = (data) => {
+      repos.value = data;
+      console.log(repos.value);
+    }
+
+    /*const searchRepos = computed(() => {
       return repos.value.filter(item => {
 
-        // Select what repo data to search on
         const searchables = ["name", "description", "language"];
         var found = false;
 
@@ -65,22 +95,29 @@ export default {
           if(item[element] !== null && item[element].toLowerCase().includes(searchTerm.value)){
             found = true;
           }
-
         });
 
         return found;
+      }).sort((a, b) => {
+        const selectedOrder = sorting.value.split("--");
+
+        if(selectedOrder[1] == "asc"){
+          return ( a[selectedOrder[0]] == b[selectedOrder[0]] ) ? 0 : ( ( a[selectedOrder[0]] > b[selectedOrder[0]] ) ? 1 : -1 );
+        } else {
+          return ( a[selectedOrder[0]] == b[selectedOrder[0]] ) ? 0 : ( ( a[selectedOrder[0]] < b[selectedOrder[0]] ) ? 1 : -1 );
+        }
       });
-    });
-
-
-    console.log(searchRepos);
+    });*/
 
     return{
       props,
       repos,
       error,
-      searchTerm,
-      searchRepos
+      formatDate,
+      /*searchTerm,
+      searchRepos,
+      sorting*/
+      reorderRepo
     }
   }
 };
@@ -129,12 +166,48 @@ export default {
       width: calc((100%/3)*2);
       padding: 0 40px;
 
+      /*&__user_tools{
+        width: 100%;
+        display: flex;
+        flex-flow: row wrap;
+        justify-content: space-between;
+
+        input{
+          width: 75%;
+        }
+
+        select{
+          width: 20%;
+        }
+      }*/
+
       .repolist{
         text-align: left;
 
         &__item{
           border-bottom: 1px solid lightgray; 
           padding: 20px 0;
+
+          &__header{
+            display: flex;
+            flex-flow: row wrap;
+            justify-content: space-between;
+            align-items: baseline;
+
+            span{
+              display: block;
+              text-align: right;
+
+              &.updated{
+                font-size: 15px;
+              }
+
+              &.created{
+                color: lightgrey;
+                font-size: 13px;
+              }
+            }
+          }
 
           h3{
             margin-bottom: 15px;

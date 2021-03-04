@@ -10,7 +10,7 @@
 <script>
 import { ref } from '@vue/reactivity';
   import { useRoute } from 'vue-router';
-  import { apiCall } from '../composables/APIcalls';
+  import { apiCall } from '../composables/GlobalFunctions';
 
   export default {
     props: ["userName"],

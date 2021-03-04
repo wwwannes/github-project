@@ -14,7 +14,7 @@
 </template>
 
 <script>
-import { apiCall } from '../composables/APIcalls';
+import { apiCall } from '../composables/GlobalFunctions';
 
 export default {
     emits: ["userFound"],
