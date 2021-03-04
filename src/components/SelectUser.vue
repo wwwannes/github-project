@@ -2,10 +2,13 @@
     <div class="login__container">
         <h2 class="login__title">Search Github repos</h2>
         <div class="login__form">
-            <label class="login__form__label">Username</label>
-            <input class="login__form__input" type="text" v-model="userName"/>
+            
+            <div v-if="isLoading">Looking for user...</div>
+
+            <label class="login__form__label" v-if="!isLoading">Username</label>
+            <input class="login__form__input input" type="text" v-model="userName" v-if="!isLoading"/>
             <span class="login__form__error" v-if="errorMsg">{{  errorMsg.message }}</span>
-            <button class="login__form__btn" @click="getUserInfo">Search for user</button>
+            <button class="login__form__btn btn" @click="getUserInfo" v-if="!isLoading">Search for user</button>
         </div>
     </div>
 </template>
@@ -18,12 +21,15 @@ export default {
     data(){
         return{
             errorMsg: null,
-            userName: null
+            userName: null,
+            isLoading: false
         }
     },
     methods:{
         async getUserInfo(){
             const { data, errorMsg, loadData } = apiCall(`/users/${this.userName}`);
+
+            this.isLoading = true;
 
             await loadData();
 
@@ -66,28 +72,11 @@ export default {
                 font-weight: bold;
             }
 
-            &__input{
-                border: 1px solid lightgray;
-                border-radius: 6px;
-                width: calc(100% - 25px);
-                display: block;
-                margin-top: 5px;
-                margin-bottom: 15px;
-                line-height: 25px;
-                padding: 5px 12px;
-            }
-
             &__btn{
                 margin-top: 20px;
                 background: #2ea44f;
-                color: white;
                 width: 100%;
-                display: block;
-                padding: 5px 16px;
-                font-size: 14px;
                 border: none;
-                border-radius: 6px;
-                line-height: 25px;
 
                 transition: all .7s;
 

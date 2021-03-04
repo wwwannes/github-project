@@ -23,6 +23,8 @@ import { ref } from '@vue/reactivity';
 
       const details = ref(data);
 
+      console.log(details)
+
       return{
         route,
         details,
