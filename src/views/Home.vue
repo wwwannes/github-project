@@ -1,51 +1,53 @@
 <template>
-  <div class="repos">
-    <div class="repos__user">
-      <div class="repos__user__image">
-        <img :src="userData.avatar_url" :alt="userData.login"/>
+  <div class="container">
+    <div class="repos">
+      <div class="repos__user">
+        <div class="repos__user__image">
+          <img :src="userData.avatar_url" :alt="userData.login"/>
+        </div>
+        <div class="repos__user__info">
+          <h2 class="name" v-if="userData.name">{{ userData.name }}</h2>
+          <h1 class="username row" v-if="userData.login">{{ userData.login }}</h1>
+          <p class="bio row" v-if="userData.bio">{{ userData.bio }}</p>
+          <a :href="userData.html_url" target="_blank" class="visit btn row">Github page</a>
+          <span class="followers row">{{ userData.followers }} followers, {{ userData.following }} following</span>
+          <ul class="more-info row">
+            <li v-if="userData.company">{{ userData.company }}</li>
+            <li v-if="userData.location">{{ userData.location }}</li>
+          </ul>
+        </div>
       </div>
-      <div class="repos__user__info">
-        <h2 class="name" v-if="userData.name">{{ userData.name }}</h2>
-        <h1 class="username row" v-if="userData.login">{{ userData.login }}</h1>
-        <p class="bio row" v-if="userData.bio">{{ userData.bio }}</p>
-        <a :href="userData.html_url" target="_blank" class="visit btn row">Github page</a>
-        <span class="followers row">{{ userData.followers }} followers, {{ userData.following }} following</span>
-        <ul class="more-info row">
-          <li v-if="userData.company">{{ userData.company }}</li>
-          <li v-if="userData.location">{{ userData.location }}</li>
-        </ul>
-      </div>
-    </div>
-    <div class="repos__content">
+      <div class="repos__content">
 
-      <!--<div class="repos__content__user_tools">
-        <input type="text" v-model="searchTerm" class="input" placeholder="Search for repositories..."/>
-        <select v-model="sorting">
-          <option value="name--asc">Name Ascending</option>
-          <option value="name--desc">Name Descending</option>
-          <option value="created_at--asc">Created Ascending</option>
-          <option value="created_at--desc">Created Descending</option>
-          <option value="updated_at--asc">Updated Ascending</option>
-          <option value="updated_at--desc">Updated Descending</option>
-        </select>
-      </div>-->
+        <!--<div class="repos__content__user_tools">
+          <input type="text" v-model="searchTerm" class="input" placeholder="Search for repositories..."/>
+          <select v-model="sorting">
+            <option value="name--asc">Name Ascending</option>
+            <option value="name--desc">Name Descending</option>
+            <option value="created_at--asc">Created Ascending</option>
+            <option value="created_at--desc">Created Descending</option>
+            <option value="updated_at--asc">Updated Ascending</option>
+            <option value="updated_at--desc">Updated Descending</option>
+          </select>
+        </div>-->
 
-      <UserTools :data="repos" @updateList="reorderRepo" v-if="repos.length > 0"/>
+        <UserTools :data="repos" @updateList="reorderRepo" v-if="repos.length > 0"/>
 
-      <ul class="repolist" v-if="!error">
-        <li class="repolist__item" v-for="repo in repos" :key="repo.id">
-          <div class="repolist__item__header">
-            <h3><router-link :to="{name: 'Details', params: {name: repo.name}}" >{{ repo.name }}</router-link></h3>
-            <div class="repolist__item__dates">
-              <span class="updated">Last updated: {{ formatDate(repo.updated_at) }}</span>
-              <span class="created">Created: {{ formatDate(repo.created_at) }}</span>
+        <ul class="repolist" v-if="!error">
+          <li class="repolist__item" v-for="repo in repos" :key="repo.id">
+            <div class="repolist__item__header">
+              <h3><router-link :to="{name: 'Details', params: {name: repo.name}}" >{{ repo.name }}</router-link></h3>
+              <div class="repolist__item__dates">
+                <span class="updated">Last updated: {{ formatDate(repo.updated_at) }}</span>
+                <span class="created">Created: {{ formatDate(repo.created_at) }}</span>
+              </div>
             </div>
-          </div>
-          <p class="info">{{ repo.description }}</p>
-          <span class="languages row">{{ repo.language }}</span>
-        </li>
-      </ul>
-      <div class="error" v-if="error">{{ error.message }}</div>
+            <p class="info">{{ repo.description }}</p>
+            <span class="languages row">{{ repo.language }}</span>
+          </li>
+        </ul>
+        <div class="error" v-if="error">{{ error.message }}</div>
+      </div>
     </div>
   </div>
 </template>
@@ -125,14 +127,18 @@ export default {
 
 <style lang="scss" scoped>
   .repos{
-    max-width: 1280px;
-    margin: 0 auto;
-    padding: 0 30px;
     display: flex;
     justify-content: space-between;
 
     &__user{
       width: 33%;
+
+      &__image{
+        img{
+          max-width: 100%;
+          border-radius: 50%;
+        }
+      }
 
       &__info{
         padding: 20px 0;
@@ -213,7 +219,6 @@ export default {
             margin-bottom: 15px;
 
             a{
-              color: #0366d6;
               font-weight: bold;
 
               &:hover{

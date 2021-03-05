@@ -11,7 +11,7 @@
         </select>
     </div>
 
-    {{ searchRepos }} <!-- Not shown in HTML but needed for this to work ? -->
+    <!--{{ searchRepos }}--> <!-- Not shown in HTML but needed for this to work ? -->
 
 </template>
 

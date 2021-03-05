@@ -27,6 +27,14 @@ export default {
 </script>
 
 <style lang="scss">
+
+  *{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    outline: none;
+  }
+
   #app {
     font-family: Avenir, Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
@@ -35,8 +43,19 @@ export default {
     color: #2c3e50;
   }
 
+  .container{
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 60px 30px;
+  }
+
   a{
     text-decoration: none;
+    color: #0366d6;
+
+    &:hover{
+      text-decoration: underline;
+    }
   }
 
   ul{

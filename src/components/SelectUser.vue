@@ -7,34 +7,41 @@
 
             <label class="login__form__label" v-if="!isLoading">Username</label>
             <input class="login__form__input input" type="text" v-model="userName" v-if="!isLoading"/>
-            <span class="login__form__error" v-if="errorMsg">{{  errorMsg.message }}</span>
+            <span class="login__form__error" v-if="err">{{  err.message }}</span>
             <button class="login__form__btn btn" @click="getUserInfo" v-if="!isLoading">Search for user</button>
         </div>
     </div>
 </template>
 
 <script>
+import { ref } from '@vue/reactivity';
 import { apiCall } from '../composables/GlobalFunctions';
 
 export default {
     emits: ["userFound"],
-    data(){
-        return{
-            errorMsg: null,
-            userName: null,
-            isLoading: false
-        }
-    },
-    methods:{
-        async getUserInfo(){
-            const { data, errorMsg, loadData } = apiCall(`/users/${this.userName}`);
+    setup(props, {emit}){
 
-            this.isLoading = true;
+        const err = ref('');
+        const userName = ref('');
+        const isLoading = ref(false);
+
+        const getUserInfo = async () => {
+            const { data, errorMsg, loadData } = apiCall(`/users/${userName.value}`);
+
+            isLoading.value = true;
 
             await loadData();
 
-            await this.$emit('userFound', data) // Make the user data available in App.vue
-            this.errorMsg = errorMsg;
+            await emit('userFound', data)
+            err.value = errorMsg;
+
+        }
+
+        return{
+            err,
+            userName,
+            isLoading,
+            getUserInfo
         }
     }
 }
