@@ -2,7 +2,9 @@
   <div class="container" v-if="route.params.name">
     <div class="repo">
       <div class="repo__container">
-        <UserTools :data="details" @updateList="reorderCommits" v-if="details.length > 0" />
+
+        <UserTools :data="details" :searchables="searchables" :sortOptions="sortOptions" @updateList="reorderCommits" v-if="details.length > 0" />
+        
         <div class="repo__container__header">
           <div clss="latest-update">
             <router-link :to="{name: 'Home'}">{{ userData.login }}</router-link> / {{ route.params.name }}
@@ -11,12 +13,12 @@
         </div>
         <div v-if="details.length > 0">
           <div class="repo__container__item" v-for="detail in details" :key="detail.node_id">
-            <span class="msg">{{ detail.commit.message }}</span>
+            <span class="msg">{{ detail.message }}</span>
             <div class="user" v-if="detail.committer">
-              <img :src="detail.committer.avatar_url" :alt="detail.committer.login" :title="detail.committer.login"/> 
-              <span>{{ detail.committer.login }}</span>
+              <img :src="detail.avatar" :alt="detail.committer" :title="detail.committer"/> 
+              <span>{{ detail.committer }}</span>
             </div>
-            <span class="date">Updated {{ formatDate(detail.commit.committer.date) }}</span>
+            <span class="date">Updated {{ formatDate(detail.date) }}</span>
           </div>
         </div>
       </div>
@@ -46,16 +48,32 @@ import { ref } from '@vue/reactivity';
       const route = useRoute();
       const details = ref({});
       const errorMsg = ref({});
+      const searchables = ["message", "committer"];
+      const sortOptions = [
+        {"value": "message--asc", "name": "Message Ascending"},
+        {"value": "message--desc", "name": "Message Descending"},
+        {"value": "committer--asc", "name": "Committer Ascending"},
+        {"value": "committer--desc", "name": "Committer Descending"},
+        {"value": "date--asc", "name": "Date Ascending"},
+        {"value": "date--desc", "name": "Date Descending"}
+      ];
 
       const getDetails = async() => {
         const {data, errorMsg, loadData} = apiCall(`/repos/${props.userData.login}/${route.params.name}/commits?per_page=4`);
     
         await loadData();
 
-        details.value = data.value;
+        // Create object with only required data, easier for sorting and searching.
+        details.value = data.value.map(item => {
+          return {...{
+            "message": item.commit.message,
+            "committer": item.commit.committer.name,
+            "avatar": item.committer.avatar_url,
+            "date": item.commit.committer.date
+          }}
+        })
+        
         errorMsg.value = errorMsg;
-
-        console.log(details)
       }
 
       getDetails();
@@ -78,7 +96,9 @@ import { ref } from '@vue/reactivity';
         formatDate,
         getDetails,
         getMoreDetails,
-        reorderCommits
+        reorderCommits,
+        sortOptions,
+        searchables
       }
     }
   }

@@ -1,4 +1,7 @@
 <template>
+
+  <Loader/>
+
   <div class="container">
     <div class="repos">
       <div class="repos__user">
@@ -19,19 +22,7 @@
       </div>
       <div class="repos__content">
 
-        <!--<div class="repos__content__user_tools">
-          <input type="text" v-model="searchTerm" class="input" placeholder="Search for repositories..."/>
-          <select v-model="sorting">
-            <option value="name--asc">Name Ascending</option>
-            <option value="name--desc">Name Descending</option>
-            <option value="created_at--asc">Created Ascending</option>
-            <option value="created_at--desc">Created Descending</option>
-            <option value="updated_at--asc">Updated Ascending</option>
-            <option value="updated_at--desc">Updated Descending</option>
-          </select>
-        </div>-->
-
-        <UserTools :data="repos" @updateList="reorderRepo" v-if="repos.length > 0"/>
+        <UserTools :data="reposOriginal" :searchables="searchables" :sortOptions="sortOptions" @updateList="reorderRepo"/>
 
         <ul class="repolist" v-if="!error">
           <li class="repolist__item" v-for="repo in repos" :key="repo.id">
@@ -55,21 +46,29 @@
 <script>
 import { ref } from '@vue/reactivity';
 import { apiCall, formatDate } from '../composables/GlobalFunctions';
-//import { computed } from '@vue/runtime-core';
-
 import UserTools from "../components/UserTools";
+import Loader from "../components/Loader";
 
 export default {
   name: "Home",
   props: ["userData"],
   components:{
-    UserTools
+    UserTools,
+    Loader
   },
   setup(props){
-    /*const searchTerm = ref("");
-    const sorting = ref("name--asc")*/
     const repos = ref([]);
+    const reposOriginal = ref([]);
     const error = ref({});
+    const searchables = ["name", "description", "language"];
+    const sortOptions = [
+      {"value": "name--asc", "name": "Name Ascending"},
+      {"value": "name--desc", "name": "Name Descending"},
+      {"value": "created_at--asc", "name": "Created Ascending"},
+      {"nvalueame": "created_at--desc", "name": "Created Descending"},
+      {"value": "updated_at--asc", "name": "Updated Ascending"},
+      {"value": "updated_at--desc", "name": "Updated Descending"}
+    ];
 
     const getAllRepos = async () => {
       const { data, errorMsg, loadData } = apiCall(`/users/${props.userData.login}/repos`);
@@ -77,49 +76,27 @@ export default {
       await loadData();
 
       repos.value = data.value;
+      reposOriginal.value = data.value;
       error.value = errorMsg.value;
+
+      console.log(reposOriginal)
     }
 
     getAllRepos();
 
     const reorderRepo = (data) => {
       repos.value = data;
-      console.log(repos.value);
     }
-
-    /*const searchRepos = computed(() => {
-      return repos.value.filter(item => {
-
-        const searchables = ["name", "description", "language"];
-        var found = false;
-
-        searchables.forEach(element => {
-          if(item[element] !== null && item[element].toLowerCase().includes(searchTerm.value)){
-            found = true;
-          }
-        });
-
-        return found;
-      }).sort((a, b) => {
-        const selectedOrder = sorting.value.split("--");
-
-        if(selectedOrder[1] == "asc"){
-          return ( a[selectedOrder[0]] == b[selectedOrder[0]] ) ? 0 : ( ( a[selectedOrder[0]] > b[selectedOrder[0]] ) ? 1 : -1 );
-        } else {
-          return ( a[selectedOrder[0]] == b[selectedOrder[0]] ) ? 0 : ( ( a[selectedOrder[0]] < b[selectedOrder[0]] ) ? 1 : -1 );
-        }
-      });
-    });*/
 
     return{
       props,
       repos,
       error,
       formatDate,
-      /*searchTerm,
-      searchRepos,
-      sorting*/
-      reorderRepo
+      searchables,
+      sortOptions,
+      reorderRepo,
+      reposOriginal
     }
   }
 };

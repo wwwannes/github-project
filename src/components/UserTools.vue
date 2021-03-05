@@ -1,42 +1,33 @@
 <template>
     <div class="user_tools">
-        <input type="text" v-model="searchTerm" class="input" placeholder="Search for repositories..."/>
+        <input type="text" class="input" placeholder="Search for repositories..." v-model="searchTerm"/>
         <select v-model="sorting">
-          <option value="name--asc">Name Ascending</option>
-          <option value="name--desc">Name Descending</option>
-          <option value="created_at--asc">Created Ascending</option>
-          <option value="created_at--desc">Created Descending</option>
-          <option value="updated_at--asc">Updated Ascending</option>
-          <option value="updated_at--desc">Updated Descending</option>
+            <option value="">Sort by</option>
+            <option :value="option.value" v-for="option in sortOptions" :key="option.value">{{ option.name }}</option>
         </select>
     </div>
-
-    <!--{{ searchRepos }}--> <!-- Not shown in HTML but needed for this to work ? -->
-
 </template>
 
 <script>
 import { ref } from '@vue/reactivity'
-import { computed } from '@vue/runtime-core';
+import { watch } from '@vue/runtime-core';
 
 export default {
-    props: ["data"],
+    props: ["data", "searchables", "sortOptions"],
     emits: ["updateList"],
     setup(props, {emit}){
         const searchTerm = ref("");
-        const sorting = ref("name--asc");
+        const sorting = ref("");
 
-        const searchRepos = computed(() => {
-            console.log('COMPUTED')
+        // in this instance, watch works better then computed.
+        watch([searchTerm, sorting], () => {
             emit('updateList', props.data.filter(item => {
-
-                const searchables = ["name", "description", "language"];
                 var found = false;
 
-                searchables.forEach(element => {
-                if(item[element] !== null && item[element].toLowerCase().includes(searchTerm.value)){
-                    found = true;
-                }
+                props.searchables.forEach(element => {
+                    if(item[element] !== null && item[element].toLowerCase().includes(searchTerm.value)){
+                        found = true;
+                    }
                 });
 
                 return found;
@@ -44,9 +35,9 @@ export default {
                 const selectedOrder = sorting.value.split("--");
 
                 if(selectedOrder[1] == "asc"){
-                return ( a[selectedOrder[0]] == b[selectedOrder[0]] ) ? 0 : ( ( a[selectedOrder[0]] > b[selectedOrder[0]] ) ? 1 : -1 );
+                    return ( a[selectedOrder[0]] == b[selectedOrder[0]] ) ? 0 : ( ( a[selectedOrder[0]].toLowerCase() > b[selectedOrder[0]].toLowerCase() ) ? 1 : -1 );
                 } else {
-                return ( a[selectedOrder[0]] == b[selectedOrder[0]] ) ? 0 : ( ( a[selectedOrder[0]] < b[selectedOrder[0]] ) ? 1 : -1 );
+                    return ( a[selectedOrder[0]] == b[selectedOrder[0]] ) ? 0 : ( ( a[selectedOrder[0]].toLowerCase() < b[selectedOrder[0]].toLowerCase() ) ? 1 : -1 );
                 }
             }));
         });
@@ -54,7 +45,7 @@ export default {
         return{
             searchTerm,
             sorting,
-            searchRepos
+            //searchRepos
         }
     }
 }
