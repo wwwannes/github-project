@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from "vue-router";
 import Home from "../views/Home.vue";
-import Details from "../views/Details.vue";
+import Commits from "../views/Commits.vue";
+import Files from "../views/Files.vue";
 
 const routes = [
   {
@@ -10,8 +11,14 @@ const routes = [
   },
   {
     path: "/:name",
-    name: "Details",
-    component: Details,
+    name: "Commits",
+    component: Commits,
+    props: true
+  },
+  {
+    path: "/:name/:id",
+    name: "Files",
+    component: Files,
     props: true
   }
 ];

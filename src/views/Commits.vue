@@ -13,12 +13,14 @@
         </div>
         <div v-if="details.length > 0">
           <div class="repo__container__item" v-for="detail in details" :key="detail.node_id">
-            <span class="msg">{{ detail.message }}</span>
-            <div class="user" v-if="detail.committer">
-              <img :src="detail.avatar" :alt="detail.committer" :title="detail.committer"/> 
-              <span>{{ detail.committer }}</span>
+            <div class="repo__container__item__header">
+              <router-link :to="{name: 'Files', params: {name: route.params.name, id: detail.sha, username: userData.login}}" class="msg">{{ detail.message }}</router-link>
+              <div class="user" v-if="detail.committer">
+                <img :src="detail.avatar" :alt="detail.committer" :title="detail.committer"/> 
+                <span>{{ detail.committer }}</span>
+              </div>
+              <span class="date">Updated {{ formatDate(detail.date) }}</span>
             </div>
-            <span class="date">Updated {{ formatDate(detail.date) }}</span>
           </div>
         </div>
       </div>
@@ -35,6 +37,7 @@
 <script>
 import { ref } from '@vue/reactivity';
   import { useRoute } from 'vue-router';
+
   import { apiCall, formatDate } from '../composables/GlobalFunctions';
 
   import UserTools from "../components/UserTools";
@@ -66,12 +69,15 @@ import { ref } from '@vue/reactivity';
         // Create object with only required data, easier for sorting and searching.
         details.value = data.value.map(item => {
           return {...{
+            "sha": item.sha,
             "message": item.commit.message,
             "committer": item.commit.committer.name,
             "avatar": item.committer.avatar_url,
             "date": item.commit.committer.date
           }}
         })
+
+        console.log(data)
         
         errorMsg.value = errorMsg;
       }
@@ -82,20 +88,12 @@ import { ref } from '@vue/reactivity';
         details.value = data;
       }
 
-      const getMoreDetails = async (id) => {
-        const {data, errorMsg, loadData} = apiCall(`/repos/${props.userData.login}/${route.params.name}/commits/${id}`);
-        await loadData();
-
-        console.log(data, errorMsg);
-      }
-
       return{
         route,
         details,
         errorMsg,
         formatDate,
         getDetails,
-        getMoreDetails,
         reorderCommits,
         sortOptions,
         searchables
@@ -134,46 +132,49 @@ import { ref } from '@vue/reactivity';
           text-align: right;
         }
       }
+      
       &__item{
-        padding: 20px 12px;
-        border: 1px solid lightgray;
-        border-bottom: none;
-        display: flex;
-        flex-direction: column;
-        flex-flow: nowrap;
-        align-items: center;
-        justify-content: space-between;
-        text-align: left;
-
-        &:last-of-type{
-          border-bottom: 1px solid lightgray;
-          border-bottom-left-radius: 6px;
-          border-bottom-right-radius: 6px;
-        }
-
-        .msg,
-        .user,
-        .date{
-          font-size: 14px;
-          text-align: left;
-          width: calc(100%/3);
-        }
-
-        .user{
-          line-height: 30px;
+        &__header{
+          padding: 20px 12px;
+          border: 1px solid lightgray;
+          border-bottom: none;
           display: flex;
+          flex-direction: column;
+          flex-flow: nowrap;
           align-items: center;
-          justify-content: center;
+          justify-content: space-between;
+          text-align: left;
 
-          img{
-            height: 30px;
-            border-radius: 50%;
-            margin-right: 7px;
+          &:last-of-type{
+            border-bottom: 1px solid lightgray;
+            border-bottom-left-radius: 6px;
+            border-bottom-right-radius: 6px;
           }
-        }
 
-        .date{
-          text-align: right;
+          .msg,
+          .user,
+          .date{
+            font-size: 14px;
+            text-align: left;
+            width: calc(100%/3);
+          }
+
+          .user{
+            line-height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            img{
+              height: 30px;
+              border-radius: 50%;
+              margin-right: 7px;
+            }
+          }
+
+          .date{
+            text-align: right;
+          }
         }
       }
     }

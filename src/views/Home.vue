@@ -27,7 +27,7 @@
         <ul class="repolist" v-if="!error">
           <li class="repolist__item" v-for="repo in repos" :key="repo.id">
             <div class="repolist__item__header">
-              <h3><router-link :to="{name: 'Details', params: {name: repo.name}}" >{{ repo.name }}</router-link></h3>
+              <h3><router-link :to="{name: 'Commits', params: {name: repo.name}}" >{{ repo.name }}</router-link></h3>
               <div class="repolist__item__dates">
                 <span class="updated">Last updated: {{ formatDate(repo.updated_at) }}</span>
                 <span class="created">Created: {{ formatDate(repo.created_at) }}</span>
