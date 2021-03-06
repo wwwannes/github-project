@@ -11,18 +11,19 @@
           </div>
           <span class="date">created 2 Mar 2018</span>
         </div>
-        <div v-if="details.length > 0">
+        <div v-if="!loadingData" ref='scrollComponent'>
           <div class="repo__container__item" v-for="detail in details" :key="detail.node_id">
             <div class="repo__container__item__header">
               <router-link :to="{name: 'Files', params: {name: route.params.name, id: detail.sha, username: userData.login}}" class="msg">{{ detail.message }}</router-link>
               <div class="user" v-if="detail.committer">
-                <img :src="detail.avatar" :alt="detail.committer" :title="detail.committer"/> 
+                <img :src="detail.avatar" :alt="detail.committer" :title="detail.committer" v-if="detail.avatar"/> 
                 <span>{{ detail.committer }}</span>
               </div>
               <span class="date">Updated {{ formatDate(detail.date) }}</span>
             </div>
           </div>
         </div>
+        <Loader v-if="loadingData"/>
       </div>
       <div class="repo__sidebar">
         <div class="repo__sidebar__about">
@@ -35,22 +36,26 @@
 </template>
 
 <script>
-import { ref } from '@vue/reactivity';
+  import { ref } from '@vue/reactivity';
+  import { onMounted, onUnmounted } from '@vue/runtime-core';
   import { useRoute } from 'vue-router';
 
   import { apiCall, formatDate } from '../composables/GlobalFunctions';
 
   import UserTools from "../components/UserTools";
+  import Loader from "../components/Loader"
 
   export default {
     props: ["userData"],
     components:{
-      UserTools
+      UserTools,
+      Loader
     },
     setup(props){
       const route = useRoute();
       const details = ref({});
       const errorMsg = ref({});
+      const scrollComponent = ref(null);
       const searchables = ["message", "committer"];
       const sortOptions = [
         {"value": "message--asc", "name": "Message Ascending"},
@@ -60,30 +65,53 @@ import { ref } from '@vue/reactivity';
         {"value": "date--asc", "name": "Date Ascending"},
         {"value": "date--desc", "name": "Date Descending"}
       ];
+      const loadingData = ref(true);
 
+      let page = 1;
+
+      onMounted(() => {
+        window.addEventListener("scroll", handleScroll)
+      })
+      onUnmounted(() => {
+        window.removeEventListener("scroll", handleScroll)
+      })
+
+      // takes care off the api call to retreive commits
       const getDetails = async() => {
-        const {data, errorMsg, loadData} = apiCall(`/repos/${props.userData.login}/${route.params.name}/commits?per_page=4`);
-    
+        const {data, errorMsg, loadData} = apiCall(`/repos/${props.userData.login}/${route.params.name}/commits?per_page=11&page=${page}`);
+
         await loadData();
 
         // Create object with only required data, easier for sorting and searching.
-        details.value = data.value.map(item => {
-          return {...{
-            "sha": item.sha,
-            "message": item.commit.message,
-            "committer": item.commit.committer.name,
-            "avatar": item.committer.avatar_url,
-            "date": item.commit.committer.date
-          }}
+        const results = data.value.map(item => {
+            return {...{
+              "sha": item.sha,
+              "message": item.commit.message,
+              "committer": item.commit.committer.name,
+              "avatar": item.committer ? item.committer.avatar_url : false,
+              "date": item.commit.committer.date
+            }}
         })
 
-        console.log(data)
-        
+        // initialise commits list at the start, or add to it on scroll
+        page === 1 ? details.value = results : details.value.push(...results)
+
+        page ++;
         errorMsg.value = errorMsg;
+        loadingData.value = false;
       }
 
       getDetails();
 
+      // infinite scroll
+      const handleScroll = () => {
+        let element = scrollComponent.value
+        if ( element.getBoundingClientRect().bottom < window.innerHeight && !loadingData.value) {
+          getDetails();
+        }
+      }
+
+      // handle the search and sort results
       const reorderCommits = (data) => {
         details.value = data;
       }
@@ -96,7 +124,9 @@ import { ref } from '@vue/reactivity';
         getDetails,
         reorderCommits,
         sortOptions,
-        searchables
+        searchables,
+        loadingData,
+        scrollComponent
       }
     }
   }
@@ -134,6 +164,13 @@ import { ref } from '@vue/reactivity';
       }
       
       &__item{
+        &:last-of-type{
+          &__header{
+            border-bottom: 1px solid lightgray;
+            border-bottom-left-radius: 6px;
+            border-bottom-right-radius: 6px;
+          }
+        }
         &__header{
           padding: 20px 12px;
           border: 1px solid lightgray;
@@ -144,12 +181,6 @@ import { ref } from '@vue/reactivity';
           align-items: center;
           justify-content: space-between;
           text-align: left;
-
-          &:last-of-type{
-            border-bottom: 1px solid lightgray;
-            border-bottom-left-radius: 6px;
-            border-bottom-right-radius: 6px;
-          }
 
           .msg,
           .user,
