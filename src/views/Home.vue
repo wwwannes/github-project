@@ -1,19 +1,24 @@
 <template>
-
-  <Loader/>
-
   <div class="container">
-    <div class="repos">
+    <Loader v-if="isLoading" />
+    <div class="repos" v-if="!isLoading">
       <div class="repos__user">
         <div class="repos__user__image">
-          <img :src="userData.avatar_url" :alt="userData.login"/>
+          <img :src="userData.avatar_url" :alt="userData.login" />
         </div>
         <div class="repos__user__info">
           <h2 class="name" v-if="userData.name">{{ userData.name }}</h2>
-          <h1 class="username row" v-if="userData.login">{{ userData.login }}</h1>
+          <h1 class="username row" v-if="userData.login">
+            {{ userData.login }}
+          </h1>
           <p class="bio row" v-if="userData.bio">{{ userData.bio }}</p>
-          <a :href="userData.html_url" target="_blank" class="visit btn row">Github page</a>
-          <span class="followers row">{{ userData.followers }} followers, {{ userData.following }} following</span>
+          <a :href="userData.html_url" target="_blank" class="visit btn row"
+            >Github page</a
+          >
+          <span class="followers row"
+            >{{ userData.followers }} followers,
+            {{ userData.following }} following</span
+          >
           <ul class="more-info row">
             <li v-if="userData.company">{{ userData.company }}</li>
             <li v-if="userData.location">{{ userData.location }}</li>
@@ -21,16 +26,37 @@
         </div>
       </div>
       <div class="repos__content">
-
-        <UserTools :data="reposOriginal" :searchables="searchables" :sortOptions="sortOptions" @updateList="reorderRepo"/>
+        <UserTools
+          :data="reposOriginal"
+          :searchables="searchables"
+          :sortOptions="sortOptions"
+          @updateList="reorderRepo"
+        />
 
         <ul class="repolist" v-if="!error">
           <li class="repolist__item" v-for="repo in repos" :key="repo.id">
             <div class="repolist__item__header">
-              <h3><router-link :to="{name: 'Commits', params: {name: repo.name}}" >{{ repo.name }}</router-link></h3>
+              <h3>
+                <router-link
+                  :to="{
+                    name: 'Commits',
+                    params: {
+                      name: repo.name,
+                      description: repo.description,
+                      language: repo.language
+                    }
+                  }"
+                >
+                  {{ repo.name }}
+                </router-link>
+              </h3>
               <div class="repolist__item__dates">
-                <span class="updated">Last updated: {{ formatDate(repo.updated_at) }}</span>
-                <span class="created">Created: {{ formatDate(repo.created_at) }}</span>
+                <span class="updated"
+                  >Last updated: {{ formatDate(repo.updated_at) }}</span
+                >
+                <span class="created"
+                  >Created: {{ formatDate(repo.created_at) }}</span
+                >
               </div>
             </div>
             <p class="info">{{ repo.description }}</p>
@@ -44,51 +70,55 @@
 </template>
 
 <script>
-import { ref } from '@vue/reactivity';
-import { apiCall, formatDate } from '../composables/GlobalFunctions';
+import { ref } from "@vue/reactivity";
+import { apiCall, formatDate } from "../composables/GlobalFunctions";
 import UserTools from "../components/UserTools";
 import Loader from "../components/Loader";
 
 export default {
   name: "Home",
   props: ["userData"],
-  components:{
+  components: {
     UserTools,
     Loader
   },
-  setup(props){
+  setup(props) {
+    const isLoading = ref(true);
     const repos = ref([]);
     const reposOriginal = ref([]);
     const error = ref({});
     const searchables = ["name", "description", "language"];
     const sortOptions = [
-      {"value": "name--asc", "name": "Name Ascending"},
-      {"value": "name--desc", "name": "Name Descending"},
-      {"value": "created_at--asc", "name": "Created Ascending"},
-      {"nvalueame": "created_at--desc", "name": "Created Descending"},
-      {"value": "updated_at--asc", "name": "Updated Ascending"},
-      {"value": "updated_at--desc", "name": "Updated Descending"}
+      { value: "name--asc", name: "Name Ascending" },
+      { value: "name--desc", name: "Name Descending" },
+      { value: "created_at--asc", name: "Created Ascending" },
+      { nvalueame: "created_at--desc", name: "Created Descending" },
+      { value: "updated_at--asc", name: "Updated Ascending" },
+      { value: "updated_at--desc", name: "Updated Descending" }
     ];
 
     const getAllRepos = async () => {
-      const { data, errorMsg, loadData } = apiCall(`/users/${props.userData.login}/repos`);
+      const { data, errorMsg, loadData } = apiCall(
+        `/users/${props.userData.login}/repos`
+      );
 
       await loadData();
 
       repos.value = data.value;
-      reposOriginal.value = data.value;
+      reposOriginal.value =
+        data.value; /* Have a different for searching and filtering */
       error.value = errorMsg.value;
-
-      console.log(reposOriginal)
-    }
+      isLoading.value = false;
+    };
 
     getAllRepos();
 
-    const reorderRepo = (data) => {
+    const reorderRepo = data => {
       repos.value = data;
-    }
+    };
 
-    return{
+    return {
+      isLoading,
       props,
       repos,
       error,
@@ -97,124 +127,109 @@ export default {
       sortOptions,
       reorderRepo,
       reposOriginal
-    }
+    };
   }
 };
 </script>
 
 <style lang="scss" scoped>
-  .repos{
-    display: flex;
-    justify-content: space-between;
+.repos {
+  display: flex;
+  justify-content: space-between;
 
-    &__user{
-      width: 33%;
+  &__user {
+    width: 33%;
 
-      &__image{
-        img{
-          max-width: 100%;
-          border-radius: 50%;
-        }
-      }
-
-      &__info{
-        padding: 20px 0;
-        text-align: left;
-
-        .name{
-          line-height: 1.25;
-          margin: 0;
-        }
-
-        .username{
-          margin: 0;
-          margin-bottom: 20px;
-          font-weight: 300;
-          line-height: 24px;
-          color: lightgray;
-        }
-
-        .bio{
-          padding: 20px 0;
-        }
-
-        .row{
-          margin-bottom: 20px;
-          display: block;
-        }
+    &__image {
+      img {
+        max-width: 100%;
+        border-radius: 50%;
       }
     }
 
-    &__content{
-      width: calc((100%/3)*2);
-      padding: 0 40px;
+    &__info {
+      padding: 20px 0;
+      text-align: left;
 
-      /*&__user_tools{
-        width: 100%;
-        display: flex;
-        flex-flow: row wrap;
-        justify-content: space-between;
+      .name {
+        line-height: 1.25;
+        margin: 0;
+      }
 
-        input{
-          width: 75%;
-        }
+      .username {
+        margin: 0;
+        margin-bottom: 20px;
+        font-weight: 300;
+        line-height: 24px;
+        color: lightgray;
+      }
 
-        select{
-          width: 20%;
-        }
-      }*/
+      .bio {
+        padding: 20px 0;
+      }
 
-      .repolist{
-        text-align: left;
+      .row {
+        margin-bottom: 20px;
+        display: block;
+      }
+    }
+  }
 
-        &__item{
-          border-bottom: 1px solid lightgray; 
-          padding: 20px 0;
+  &__content {
+    width: calc((100% / 3) * 2);
+    padding: 0 40px;
+    .repolist {
+      text-align: left;
 
-          &__header{
-            display: flex;
-            flex-flow: row wrap;
-            justify-content: space-between;
-            align-items: baseline;
+      &__item {
+        border-bottom: 1px solid lightgray;
+        padding: 20px 0;
 
-            span{
-              display: block;
-              text-align: right;
+        &__header {
+          display: flex;
+          flex-flow: row wrap;
+          justify-content: space-between;
+          align-items: baseline;
+          margin-bottom: 15px;
 
-              &.updated{
-                font-size: 15px;
-              }
+          span {
+            display: block;
+            text-align: right;
 
-              &.created{
-                color: lightgrey;
-                font-size: 13px;
-              }
+            &.updated {
+              font-size: 15px;
+            }
+
+            &.created {
+              color: lightgrey;
+              font-size: 13px;
             }
           }
+        }
 
-          h3{
-            margin-bottom: 15px;
+        h3 {
+          margin-bottom: 15px;
 
-            a{
-              font-weight: bold;
+          a {
+            font-weight: bold;
 
-              &:hover{
-                text-decoration: underline;
-              }
+            &:hover {
+              text-decoration: underline;
             }
           }
+        }
 
-          .info{
-            margin-bottom: 15px;
-            font-size: 15px;
-          }
+        .info {
+          margin-bottom: 15px;
+          font-size: 15px;
+        }
 
-          .languages{
-            color: lightgray;
-            font-size: 15px;
-          }
+        .languages {
+          color: lightgray;
+          font-size: 15px;
         }
       }
     }
   }
+}
 </style>
