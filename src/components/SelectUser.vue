@@ -22,6 +22,7 @@
 <script>
 import { ref } from "@vue/reactivity";
 import { apiCall } from "../composables/GlobalFunctions";
+import { useRouter } from "vue-router";
 
 import Loader from "../components/Loader";
 import ErrorMessage from "../components/ErrorMessage";
@@ -36,6 +37,10 @@ export default {
     const err = ref("");
     const userName = ref("");
     const isLoading = ref(false);
+    const router = useRouter();
+
+    // always redirect to the homepage when selecting a user
+    router.push("/");
 
     const getUserInfo = async () => {
       isLoading.value = true;

@@ -29,7 +29,7 @@ export default {
     const searchTerm = ref("");
     const sorting = ref("");
 
-    // in this instance, watch works better then computed.
+    // update data on any change
     watch([searchTerm, sorting], () => {
       emit(
         "updateList",

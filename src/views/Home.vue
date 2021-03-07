@@ -92,7 +92,7 @@ export default {
       { value: "name--asc", name: "Name Ascending" },
       { value: "name--desc", name: "Name Descending" },
       { value: "created_at--asc", name: "Created Ascending" },
-      { nvalueame: "created_at--desc", name: "Created Descending" },
+      { value: "created_at--desc", name: "Created Descending" },
       { value: "updated_at--asc", name: "Updated Ascending" },
       { value: "updated_at--desc", name: "Updated Descending" }
     ];
