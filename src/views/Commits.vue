@@ -13,7 +13,7 @@
         <div class="repo__container__header">
           <div clss="latest-update">
             <router-link :to="{ name: 'Home' }">{{
-              userData.login
+              store.state.userData.login
             }}</router-link>
             / {{ route.params.name }}
           </div>
@@ -32,7 +32,7 @@
                   params: {
                     name: route.params.name,
                     id: detail.sha,
-                    username: userData.login
+                    username: store.state.userData.login
                   }
                 }"
                 class="msg"
@@ -74,6 +74,7 @@ import { ref } from "@vue/reactivity";
 import { onMounted, onUnmounted } from "@vue/runtime-core";
 import { useRoute } from "vue-router";
 
+import { store } from "../composables/Store";
 import { apiCall, formatDate } from "../composables/GlobalFunctions";
 
 import UserTools from "../components/UserTools";
@@ -81,13 +82,12 @@ import Loader from "../components/Loader";
 import ErrorMessage from "../components/ErrorMessage";
 
 export default {
-  props: ["userData"],
   components: {
     UserTools,
     Loader,
     ErrorMessage
   },
-  setup(props) {
+  setup() {
     const loadingData = ref(true);
     const route = useRoute();
     const details = ref({});
@@ -116,7 +116,7 @@ export default {
     // takes care off the api call to retreive commits
     const getDetails = async () => {
       const { data, errorMsg, loadData } = apiCall(
-        `/repos/${props.userData.login}/${route.params.name}/commits?per_page=11&page=${page}`
+        `/repos/${store.state.userData.login}/${route.params.name}/commits?per_page=20&page=${page}`
       );
 
       await loadData();
@@ -163,6 +163,7 @@ export default {
     };
 
     return {
+      store,
       route,
       detailsOriginal,
       details,

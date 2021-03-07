@@ -4,24 +4,24 @@
     <div class="repos" v-if="!isLoading">
       <div class="repos__user">
         <div class="repos__user__image">
-          <img :src="userData.avatar_url" :alt="userData.login" />
+          <img :src="store.state.userData.avatar_url" :alt="store.state.userData.login" />
         </div>
         <div class="repos__user__info">
-          <h2 class="name" v-if="userData.name">{{ userData.name }}</h2>
-          <h1 class="username row" v-if="userData.login">
-            {{ userData.login }}
+          <h2 class="name" v-if="store.state.userData.name">{{ store.state.userData.name }}</h2>
+          <h1 class="username row" v-if="store.state.userData.login">
+            {{ store.state.userData.login }}
           </h1>
-          <p class="bio row" v-if="userData.bio">{{ userData.bio }}</p>
-          <a :href="userData.html_url" target="_blank" class="visit btn row"
+          <p class="bio row" v-if="store.state.userData.bio">{{ store.state.userData.bio }}</p>
+          <a :href="store.state.userData.html_url" target="_blank" class="visit btn row"
             >Github page</a
           >
           <span class="followers row"
-            >{{ userData.followers }} followers,
-            {{ userData.following }} following</span
+            >{{ store.state.userData.followers }} followers,
+            {{ store.state.userData.following }} following</span
           >
           <ul class="more-info row">
-            <li v-if="userData.company">{{ userData.company }}</li>
-            <li v-if="userData.location">{{ userData.location }}</li>
+            <li v-if="store.state.userData.company">{{ store.state.userData.company }}</li>
+            <li v-if="store.state.userData.location">{{ store.state.userData.location }}</li>
           </ul>
         </div>
       </div>
@@ -71,18 +71,20 @@
 
 <script>
 import { ref } from "@vue/reactivity";
+
+import { store } from "../composables/Store";
 import { apiCall, formatDate } from "../composables/GlobalFunctions";
+
 import UserTools from "../components/UserTools";
 import Loader from "../components/Loader";
 
 export default {
   name: "Home",
-  props: ["userData"],
   components: {
     UserTools,
     Loader
   },
-  setup(props) {
+  setup() {
     const isLoading = ref(true);
     const repos = ref([]);
     const reposOriginal = ref([]);
@@ -97,21 +99,29 @@ export default {
       { value: "updated_at--desc", name: "Updated Descending" }
     ];
 
+    console.log(store.state.userData.login)
+
     const getAllRepos = async () => {
-      const { data, errorMsg, loadData } = apiCall(
-        `/users/${props.userData.login}/repos`
-      );
+      if(store.state.repos.length == 0){
+        const { data, errorMsg, loadData } = apiCall(
+          `/users/${store.state.userData.login}/repos`
+        );
 
-      await loadData();
+        await loadData();
 
-      repos.value = data.value;
-      reposOriginal.value =
-        data.value; /* Have a different for searching and filtering */
-      error.value = errorMsg.value;
-      isLoading.value = false;
+        repos.value = reposOriginal.value = data.value; /* Have a different for searching and filtering */
+        error.value = errorMsg.value;
+        isLoading.value = false;
+        store.setRepos(repos.value);
+      } else {
+        error.value = null;
+        isLoading.value = false;
+        repos.value = reposOriginal.value = store.state.repos;
+      }
     };
-
+    
     getAllRepos();
+    
 
     const reorderRepo = data => {
       repos.value = data;
@@ -119,7 +129,7 @@ export default {
 
     return {
       isLoading,
-      props,
+      store,
       repos,
       error,
       formatDate,

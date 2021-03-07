@@ -24,6 +24,8 @@ import { ref } from "@vue/reactivity";
 import { apiCall } from "../composables/GlobalFunctions";
 import { useRouter } from "vue-router";
 
+import { store } from "../composables/Store";
+
 import Loader from "../components/Loader";
 import ErrorMessage from "../components/ErrorMessage";
 
@@ -43,18 +45,22 @@ export default {
     router.push("/");
 
     const getUserInfo = async () => {
-      isLoading.value = true;
+      if(store.state.userData.login != userName.value || store.state.userData.length == 0){
+        isLoading.value = true;
 
-      const { data, errorMsg, loadData } = apiCall(`/users/${userName.value}`);
+        const { data, errorMsg, loadData } = apiCall(`/users/${userName.value}`);
 
-      await loadData();
-      await emit("userFound", data);
+        await loadData();
 
-      isLoading.value = false;
-      err.value = errorMsg.value;
+        isLoading.value = false;
+        err.value = errorMsg.value;
+        store.setUserData(data.value);
+      }
+      await emit("userFound", true);
     };
 
     return {
+      store,
       err,
       userName,
       isLoading,

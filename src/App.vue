@@ -1,5 +1,5 @@
 <template>
-  <router-view v-if="Object.keys(userdata).length > 0" :userData="userdata" />
+  <router-view v-if="userFound"/>
   <SelectUser v-else @userFound="setUserData" />
 </template>
 
@@ -12,14 +12,14 @@ export default {
     SelectUser
   },
   setup() {
-    const userdata = ref([]);
+    const userFound = ref(false);
 
     const setUserData = data => {
-      userdata.value = data.value;
+      userFound.value = data;
     };
 
     return {
-      userdata,
+      userFound,
       setUserData
     };
   }
