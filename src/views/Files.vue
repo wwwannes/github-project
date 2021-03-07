@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <div class="breadcrumbs">
-      <router-link :to="{ name: 'Home' }">{{
+      <router-link :to="{ name: 'User' }">{{
         route.params.username
       }}</router-link>
       /
@@ -9,7 +9,7 @@
         :to="{ name: 'Commits', params: { name: route.params.name } }"
         >{{ route.params.name }}</router-link
       >
-      / Files
+      / {{ route.params.message}}
     </div>
     <Loader v-if="loadingData && !error" />
     <div v-if="!loadingData && !error">
@@ -89,6 +89,7 @@ export default {
     const files = ref([]);
     const loadingData = ref(true);
     const error = ref("");
+    const msg = ref("");
 
     const getDetails = async () => {
       const { data, errorMsg, loadData } = apiCall(
@@ -115,6 +116,7 @@ export default {
     return {
       loadingData,
       error,
+      msg,
       route,
       files,
       getDetails,

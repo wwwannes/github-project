@@ -1,26 +1,36 @@
 <template>
-  <router-view v-if="userFound"/>
-  <SelectUser v-else @userFound="setUserData" />
+  <router-view @userFound="setUserData"/>
+  <router-link to="/" @click.prevent="logOut" class="logout">Log out</router-link>
 </template>
 
 <script>
 import { ref } from "@vue/reactivity";
-import SelectUser from "./components/SelectUser";
+import { useRouter } from 'vue-router';
+
+import { store } from "./composables/Store";
 
 export default {
-  components: {
-    SelectUser
-  },
   setup() {
     const userFound = ref(false);
+    const router = useRouter();
 
     const setUserData = data => {
       userFound.value = data;
+      console.log(userFound.value);
+      router.push({name:"User", params:{user: store.state.userData.login}});
     };
+
+    const logOut = () => {
+      userFound.value = false;
+      store.clearUserData();
+      store.clearRepos();
+      router.push("/");
+    }
 
     return {
       userFound,
-      setUserData
+      setUserData,
+      logOut
     };
   }
 };
@@ -105,5 +115,11 @@ select {
     color: white;
     background: grey;
   }
+}
+
+.logout{
+  position: absolute;
+  right: 20px;
+  top: 20px;
 }
 </style>

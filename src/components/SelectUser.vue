@@ -45,7 +45,7 @@ export default {
     router.push("/");
 
     const getUserInfo = async () => {
-      if(store.state.userData.login != userName.value || store.state.userData.length == 0){
+      if(!store.state.userData || store.state.userData.login != userName.value || store.state.userData.length == 0){
         isLoading.value = true;
 
         const { data, errorMsg, loadData } = apiCall(`/users/${userName.value}`);
@@ -56,7 +56,10 @@ export default {
         err.value = errorMsg.value;
         store.setUserData(data.value);
       }
-      await emit("userFound", true);
+
+      if(!err.value){
+        emit("userFound", true);
+      }
     };
 
     return {

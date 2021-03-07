@@ -77,6 +77,7 @@ import { apiCall, formatDate } from "../composables/GlobalFunctions";
 
 import UserTools from "../components/UserTools";
 import Loader from "../components/Loader";
+import { useRoute } from 'vue-router';
 
 export default {
   name: "Home",
@@ -85,6 +86,7 @@ export default {
     Loader
   },
   setup() {
+    const route = useRoute();
     const isLoading = ref(true);
     const repos = ref([]);
     const reposOriginal = ref([]);
@@ -99,12 +101,28 @@ export default {
       { value: "updated_at--desc", name: "Updated Descending" }
     ];
 
-    console.log(store.state.userData.login)
+    const getUserInfo = async () => {
+      const { data, errorMsg, loadData } = apiCall(`/users/${route.params.user}`);
+
+      await loadData();
+
+      isLoading.value = false;
+      error.value = errorMsg.value;
+      store.setUserData(data.value);
+    }
 
     const getAllRepos = async () => {
-      if(store.state.repos.length == 0){
+      if(store.state.repos.length == 0 || store.state.repos.login != route.params.user){
+
+        let user;
+        if(store.state.repos.login != route.params.user){
+          user = route.params.user;
+        } else { 
+          user = store.state.userData.login;
+        }
+
         const { data, errorMsg, loadData } = apiCall(
-          `/users/${store.state.userData.login}/repos`
+          `/users/${user}/repos`
         );
 
         await loadData();
@@ -114,14 +132,19 @@ export default {
         isLoading.value = false;
         store.setRepos(repos.value);
       } else {
+
         error.value = null;
         isLoading.value = false;
         repos.value = reposOriginal.value = store.state.repos;
       }
     };
+
+    /* Get user info if user has been changed without using the input field at the start */
+    if(store.state.repos.login != route.params.user){
+      getUserInfo();
+    }
     
     getAllRepos();
-    
 
     const reorderRepo = data => {
       repos.value = data;

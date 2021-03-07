@@ -12,7 +12,7 @@
         />
         <div class="repo__container__header">
           <div clss="latest-update">
-            <router-link :to="{ name: 'Home' }">{{
+            <router-link :to="{ name: 'User' }">{{
               store.state.userData.login
             }}</router-link>
             / {{ route.params.name }}
@@ -32,7 +32,8 @@
                   params: {
                     name: route.params.name,
                     id: detail.sha,
-                    username: store.state.userData.login
+                    username: store.state.userData.login,
+                    message: detail.message
                   }
                 }"
                 class="msg"
@@ -45,7 +46,7 @@
                   :title="detail.committer"
                   v-if="detail.avatar"
                 />
-                <span>{{ detail.committer }}</span>
+                <router-link :to="{name:'User',params: {user: detail.login}}">{{ detail.committer }}</router-link>
               </div>
               <span class="date">Updated {{ formatDate(detail.date) }}</span>
             </div>
@@ -55,7 +56,7 @@
       </div>
       <div class="repo__sidebar">
         <div class="repo__sidebar__about">
-          <div v-if="route.params.description">
+          <div v-if="route.params.description && route.params.description != 'null'">
             <h3 class="title">About</h3>
             <p>{{ route.params.description }}</p>
           </div>
@@ -127,7 +128,8 @@ export default {
           ...{
             sha: item.sha,
             message: item.commit.message,
-            committer: item.commit.committer.name,
+            committer: item.commit.committer.name ? item.commit.committer.name : item.committer.login,
+            login: item.committer ? item.committer.login : false,
             avatar: item.committer ? item.committer.avatar_url : false,
             date: item.commit.committer.date
           }
@@ -147,11 +149,12 @@ export default {
 
     getDetails();
 
+
     // infinite scroll
     const handleScroll = () => {
       if (!loadingData.value) {
         let element = scrollComponent.value;
-        if (element.getBoundingClientRect().bottom < window.innerHeight) {
+        if (element && element.getBoundingClientRect().bottom < window.innerHeight) {
           getDetails();
         }
       }
