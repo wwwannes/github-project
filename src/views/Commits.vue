@@ -46,7 +46,10 @@
                   :title="detail.committer"
                   v-if="detail.avatar"
                 />
-                <router-link :to="{name:'User',params: {user: detail.login}}">{{ detail.committer }}</router-link>
+                <router-link
+                  :to="{ name: 'User', params: { user: detail.login } }"
+                  >{{ detail.committer }}</router-link
+                >
               </div>
               <span class="date">Updated {{ formatDate(detail.date) }}</span>
             </div>
@@ -56,7 +59,11 @@
       </div>
       <div class="repo__sidebar">
         <div class="repo__sidebar__about">
-          <div v-if="route.params.description && route.params.description != 'null'">
+          <div
+            v-if="
+              route.params.description && route.params.description != 'null'
+            "
+          >
             <h3 class="title">About</h3>
             <p>{{ route.params.description }}</p>
           </div>
@@ -128,7 +135,9 @@ export default {
           ...{
             sha: item.sha,
             message: item.commit.message,
-            committer: item.commit.committer.name ? item.commit.committer.name : item.committer.login,
+            committer: item.commit.committer.name
+              ? item.commit.committer.name
+              : item.committer.login,
             login: item.committer ? item.committer.login : false,
             avatar: item.committer ? item.committer.avatar_url : false,
             date: item.commit.committer.date
@@ -149,12 +158,14 @@ export default {
 
     getDetails();
 
-
     // infinite scroll
     const handleScroll = () => {
       if (!loadingData.value) {
         let element = scrollComponent.value;
-        if (element && element.getBoundingClientRect().bottom < window.innerHeight) {
+        if (
+          element &&
+          element.getBoundingClientRect().bottom < window.innerHeight
+        ) {
           getDetails();
         }
       }

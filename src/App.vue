@@ -1,11 +1,13 @@
 <template>
-  <router-view @userFound="setUserData"/>
-  <router-link to="/" @click.prevent="logOut" class="logout">Log out</router-link>
+  <router-view @userFound="setUserData" />
+  <router-link to="/" @click.prevent="logOut" class="logout"
+    >Log out</router-link
+  >
 </template>
 
 <script>
 import { ref } from "@vue/reactivity";
-import { useRouter } from 'vue-router';
+import { useRouter } from "vue-router";
 
 import { store } from "./composables/Store";
 
@@ -17,7 +19,10 @@ export default {
     const setUserData = data => {
       userFound.value = data;
       console.log(userFound.value);
-      router.push({name:"User", params:{user: store.state.userData.login}});
+      router.push({
+        name: "User",
+        params: { user: store.state.userData.login }
+      });
     };
 
     const logOut = () => {
@@ -25,7 +30,7 @@ export default {
       store.clearUserData();
       store.clearRepos();
       router.push("/");
-    }
+    };
 
     return {
       userFound,
@@ -117,7 +122,7 @@ select {
   }
 }
 
-.logout{
+.logout {
   position: absolute;
   right: 20px;
   top: 20px;

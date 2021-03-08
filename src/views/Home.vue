@@ -4,15 +4,25 @@
     <div class="repos" v-if="!isLoading">
       <div class="repos__user">
         <div class="repos__user__image">
-          <img :src="store.state.userData.avatar_url" :alt="store.state.userData.login" />
+          <img
+            :src="store.state.userData.avatar_url"
+            :alt="store.state.userData.login"
+          />
         </div>
         <div class="repos__user__info">
-          <h2 class="name" v-if="store.state.userData.name">{{ store.state.userData.name }}</h2>
+          <h2 class="name" v-if="store.state.userData.name">
+            {{ store.state.userData.name }}
+          </h2>
           <h1 class="username row" v-if="store.state.userData.login">
             {{ store.state.userData.login }}
           </h1>
-          <p class="bio row" v-if="store.state.userData.bio">{{ store.state.userData.bio }}</p>
-          <a :href="store.state.userData.html_url" target="_blank" class="visit btn row"
+          <p class="bio row" v-if="store.state.userData.bio">
+            {{ store.state.userData.bio }}
+          </p>
+          <a
+            :href="store.state.userData.html_url"
+            target="_blank"
+            class="visit btn row"
             >Github page</a
           >
           <span class="followers row"
@@ -20,8 +30,12 @@
             {{ store.state.userData.following }} following</span
           >
           <ul class="more-info row">
-            <li v-if="store.state.userData.company">{{ store.state.userData.company }}</li>
-            <li v-if="store.state.userData.location">{{ store.state.userData.location }}</li>
+            <li v-if="store.state.userData.company">
+              {{ store.state.userData.company }}
+            </li>
+            <li v-if="store.state.userData.location">
+              {{ store.state.userData.location }}
+            </li>
           </ul>
         </div>
       </div>
@@ -77,7 +91,7 @@ import { apiCall, formatDate } from "../composables/GlobalFunctions";
 
 import UserTools from "../components/UserTools";
 import Loader from "../components/Loader";
-import { useRoute } from 'vue-router';
+import { useRoute } from "vue-router";
 
 export default {
   name: "Home",
@@ -102,37 +116,40 @@ export default {
     ];
 
     const getUserInfo = async () => {
-      const { data, errorMsg, loadData } = apiCall(`/users/${route.params.user}`);
+      const { data, errorMsg, loadData } = apiCall(
+        `/users/${route.params.user}`
+      );
 
       await loadData();
 
       isLoading.value = false;
       error.value = errorMsg.value;
       store.setUserData(data.value);
-    }
+    };
 
     const getAllRepos = async () => {
-      if(store.state.repos.length == 0 || store.state.repos.login != route.params.user){
-
+      // Only d oan api call if the data wasn't already saved in the store
+      if (
+        store.state.repos.length == 0 ||
+        store.state.userData.login != route.params.user
+      ) {
         let user;
-        if(store.state.repos.login != route.params.user){
+        if (store.state.repos.login != route.params.user) {
           user = route.params.user;
-        } else { 
+        } else {
           user = store.state.userData.login;
         }
 
-        const { data, errorMsg, loadData } = apiCall(
-          `/users/${user}/repos`
-        );
+        const { data, errorMsg, loadData } = apiCall(`/users/${user}/repos`);
 
         await loadData();
 
-        repos.value = reposOriginal.value = data.value; /* Have a different for searching and filtering */
+        repos.value = reposOriginal.value =
+          data.value; /* Have a different for searching and filtering */
+        store.setRepos(repos.value);
         error.value = errorMsg.value;
         isLoading.value = false;
-        store.setRepos(repos.value);
       } else {
-
         error.value = null;
         isLoading.value = false;
         repos.value = reposOriginal.value = store.state.repos;
@@ -140,10 +157,10 @@ export default {
     };
 
     /* Get user info if user has been changed without using the input field at the start */
-    if(store.state.repos.login != route.params.user){
+    if (store.state.repos.login != route.params.user) {
       getUserInfo();
     }
-    
+
     getAllRepos();
 
     const reorderRepo = data => {

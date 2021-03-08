@@ -9,7 +9,7 @@
         :to="{ name: 'Commits', params: { name: route.params.name } }"
         >{{ route.params.name }}</router-link
       >
-      / {{ route.params.message}}
+      / {{ route.params.message }}
     </div>
     <Loader v-if="loadingData && !error" />
     <div v-if="!loadingData && !error">
